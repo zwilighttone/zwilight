@@ -83,7 +83,7 @@ body{
   opacity:.85;
 }
 
-/* IMPORTANT: prevent overlays blocking clicks */
+/* prevent click blocking */
 canvas,
 .flash-screen {
   pointer-events:none;
@@ -122,7 +122,7 @@ canvas,
   display:flex;
 }
 
-/* STATIC LAYER */
+/* STATIC */
 .modal-overlay::before{
   content:"";
   position:absolute;
@@ -249,7 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
       flash.classList.add("active");
 
       setTimeout(()=>{
-        frame.src = "https://zwilighttone.github.io/zwilight/" + link.dataset.page;
+        // 🔥 FIXED: RELATIVE PATH
+        frame.src = link.dataset.page;
         modal.classList.add("active");
       },120);
 
