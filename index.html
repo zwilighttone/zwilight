@@ -47,7 +47,10 @@
     .flash.dark{background:#000;mix-blend-mode:multiply;opacity:.28;}
     .slice-noise{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0;background:linear-gradient(to bottom,transparent 0%,transparent 20%,rgba(255,255,255,.18) 20%,rgba(255,255,255,.18) 24%,transparent 24%,transparent 45%,rgba(255,36,121,.12) 45%,rgba(255,36,121,.12) 49%,transparent 49%,transparent 68%,rgba(0,255,255,.14) 68%,rgba(0,255,255,.14) 73%,transparent 73%,transparent 100%);mix-blend-mode:screen;transform:translateX(0);}
     .slice-noise.on{opacity:.8;}
+.gif-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:4.5;pointer-events:none;opacity:.38;animation:gifFade 4.8s ease-in-out infinite;mix-blend-mode:screen;}
+@keyframes gifFade{0%{opacity:.25;}50%{opacity:.50;}100%{opacity:.25;}}
     .footer{margin-top:32px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;text-align:center;opacity:.72;color:rgba(220,220,240,.9);}
+    @media (max-width:480px){body{padding:16px 10px 26px;}.glitch-main::before{ inset:8px; }.controls{ gap:10px; }.ctrl-btn{min-width:80px;padding:8px 14px;font-size:11px;}.subnav{gap:4px;letter-spacing:.14em;}}
   </style>
 </head>
 <body>
@@ -72,24 +75,198 @@
     <div class="glitch-shell">
       <div class="glitch-main" id="glitchBox">
         <canvas id="vizCanvas"></canvas>
+        <img src="https://zwilighttone.github.io/zwilight/icanthearyou.gif" class="gif-overlay" alt="Animated overlay">
         <div class="jitter"></div>
         <div class="flash" id="flashLayer"></div>
         <div class="slice-noise" id="sliceNoise"></div>
-        <img src="https://zwilighttone.github.io/zwilight/glitchbox10.jpg" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids.webp" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids2.webp" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxmannequin.jpg" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxmelted.png" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxtravers.jpg" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/mk2.jpg" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/melted.webp" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/1s0s.jpg" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/mankinZT.jpg" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/zkids.webp" class="glitch-img">
-        <img src="https://zwilighttone.github.io/zwilight/zkids2.webp" class="glitch-img">
+        <img src="https://zwilighttone.github.io/zwilight/glitchbox10.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 1">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids.webp" class="glitch-img" alt="Zwilight Tone glitch visual 2">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids2.webp" class="glitch-img" alt="Zwilight Tone glitch visual 3">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxmannequin.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 4">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxmelted.png" class="glitch-img" alt="Zwilight Tone glitch visual 5">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxtravers.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 6">
+        <img src="https://zwilighttone.github.io/zwilight/mk2.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 7">
+        <img src="https://zwilighttone.github.io/zwilight/melted.webp" class="glitch-img" alt="Zwilight Tone glitch visual 8">
+        <img src="https://zwilighttone.github.io/zwilight/1s0s.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 9">
+        <img src="https://zwilighttone.github.io/zwilight/mankinZT.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 10">
+        <img src="https://zwilighttone.github.io/zwilight/zkids.webp" class="glitch-img" alt="Zwilight Tone glitch visual 11">
+        <img src="https://zwilighttone.github.io/zwilight/zkids2.webp" class="glitch-img" alt="Zwilight Tone glitch visual 12">
       </div>
     </div>
     <div class="footer">Copyright All Rights Reserved Travers MacMaster</div>
   </div>
+  <script>
+    (function(){
+      const box = document.getElementById('glitchBox');
+      const imgs = Array.from(document.querySelectorAll('.glitch-img'));
+      const flashLayer = document.getElementById('flashLayer');
+      const sliceNoise = document.getElementById('sliceNoise');
+      if(!box || !imgs.length) return;
+      let timer = null, currentMain = -1;
+      const rand=(min,max)=>Math.random()*(max-min)+min;
+      const randInt=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+      const chance=n=>Math.random()<n;
+      function clearStates(){
+        imgs.forEach(img=>{img.classList.remove('active','ghost-a','ghost-b');img.style.removeProperty('--hue');img.style.removeProperty('--tx');img.style.removeProperty('--ty');img.style.removeProperty('--sc');img.style.zIndex=1;});
+        flashLayer.classList.remove('on','dark'); sliceNoise.classList.remove('on'); sliceNoise.style.transform='translateX(0)';
+      }
+      function pickUnique(count, avoidIndex=-1){
+        const pool = imgs.map((_, i) => i).filter(i => i !== avoidIndex), chosen = [];
+        while(pool.length && chosen.length < count){ const idx = randInt(0, pool.length - 1); chosen.push(pool.splice(idx, 1)[0]); }
+        return chosen;
+      }
+      function applyImageState(img, className, z){
+        img.classList.add(className);
+        img.style.setProperty('--hue', `${randInt(0, 359)}deg`);
+        img.style.setProperty('--tx', `${rand(-8, 8).toFixed(2)}px`);
+        img.style.setProperty('--ty', `${rand(-8, 8).toFixed(2)}px`);
+        img.style.setProperty('--sc', `${rand(1.0, 1.08).toFixed(3)}`);
+        img.style.zIndex = z;
+      }
+      const pulseFlash=()=>{flashLayer.classList.remove('dark');flashLayer.classList.add('on');setTimeout(()=>flashLayer.classList.remove('on'),randInt(28,65));};
+      const pulseDarkFlash=()=>{flashLayer.classList.add('dark','on');setTimeout(()=>flashLayer.classList.remove('on','dark'),randInt(25,55));};
+      const pulseSlices=()=>{sliceNoise.classList.add('on');sliceNoise.style.transform=`translateX(${randInt(-18,18)}px)`;setTimeout(()=>{sliceNoise.classList.remove('on');sliceNoise.style.transform='translateX(0)';},randInt(30,80));};
+      function chaoticFrame(){
+        clearStates();
+        const burstMode = chance(0.28);
+        const layerCount = burstMode ? randInt(2, 4) : (chance(0.55) ? 1 : 2);
+        let mainIndex; do{ mainIndex = randInt(0, imgs.length - 1); } while(imgs.length > 1 && mainIndex === currentMain);
+        currentMain = mainIndex;
+        const stack = [mainIndex, ...pickUnique(Math.max(0, layerCount - 1), mainIndex)];
+        stack.forEach((imgIndex, i) => {
+          const img = imgs[imgIndex];
+          if(i === 0) applyImageState(img, 'active', 2);
+          else if(i === 1) applyImageState(img, 'ghost-a', 3);
+          else applyImageState(img, 'ghost-b', 3 + i);
+        });
+        if(chance(0.18)) pulseFlash();
+        if(chance(0.10)) pulseDarkFlash();
+        if(chance(0.24)) pulseSlices();
+        if(chance(0.16)){
+          box.style.transform = `translate(${rand(-4,4).toFixed(1)}px, ${rand(-3,3).toFixed(1)}px) scale(${rand(1.0,1.025).toFixed(3)})`;
+          setTimeout(()=>{box.style.transform='';}, randInt(40, 90));
+        }
+      }
+      function scheduleNext(){ chaoticFrame(); timer = setTimeout(scheduleNext, chance(0.58) ? randInt(45,125) : randInt(140,340)); }
+      scheduleNext();
+      document.addEventListener('visibilitychange',()=>{clearTimeout(timer); if(!document.hidden) scheduleNext();});
+    })();
+    (function(){
+      const TRACKS = ["https://zwilighttone.github.io/zwilight/funhouse.mp3"];
+      const playBtn = document.getElementById('playBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const statusEl = document.getElementById('status');
+      const audio = new Audio(); audio.crossOrigin = "anonymous"; audio.loop = true;
+      let audioCtx=null, analyser=null, srcNode=null, freqData=null, timeData=null, vizRunning=false, rafId=0;
+      const canvas = document.getElementById('vizCanvas');
+      const ctx = canvas.getContext('2d');
+      const pageCanvas = document.getElementById('pageVizCanvas');
+      const pageCtx = pageCanvas.getContext('2d');
+      let cw=0, ch=0, dpr=1, pcw=0, pch=0;
+      const setStatus = text => statusEl.textContent = text;
+      function resizeCanvas(){
+        dpr = Math.max(1, window.devicePixelRatio || 1);
+
+        const rect = canvas.getBoundingClientRect();
+        cw = rect.width; ch = rect.height;
+        canvas.width = cw * dpr; canvas.height = ch * dpr;
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+
+        pcw = window.innerWidth; pch = window.innerHeight;
+        pageCanvas.width = pcw * dpr; pageCanvas.height = pch * dpr;
+        pageCtx.setTransform(dpr,0,0,dpr,0,0);
+      }
+      window.addEventListener('resize', resizeCanvas); resizeCanvas();
+      function ensureAudioContext(){
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
+        if(!analyser){
+          analyser = audioCtx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.78;
+          srcNode = audioCtx.createMediaElementSource(audio); srcNode.connect(analyser); analyser.connect(audioCtx.destination);
+          freqData = new Uint8Array(analyser.frequencyBinCount); timeData = new Uint8Array(analyser.fftSize);
+        }
+      }
+      function drawViz(){
+        if(!vizRunning || !analyser) return;
+
+        analyser.getByteFrequencyData(freqData);
+        analyser.getByteTimeDomainData(timeData);
+
+        ctx.clearRect(0,0,cw,ch);
+        pageCtx.clearRect(0,0,pcw,pch);
+
+        ctx.fillStyle = "rgba(5,5,20,0.28)";
+        ctx.fillRect(0,0,cw,ch);
+
+        pageCtx.fillStyle = "rgba(5,5,20,0.10)";
+        pageCtx.fillRect(0,0,pcw,pch);
+
+        pageCtx.beginPath();
+        pageCtx.lineWidth = 3.2;
+        pageCtx.strokeStyle = "rgba(0,255,255,0.75)";
+        const pageSlice = pcw / (timeData.length - 1);
+        for(let i=0;i<timeData.length;i++){
+          const v = timeData[i] / 255;
+          const y = (v * (pch * 0.38)) + (pch * 0.16);
+          const x = i * pageSlice;
+          if(i === 0) pageCtx.moveTo(x,y);
+          else pageCtx.lineTo(x,y);
+        }
+        pageCtx.stroke();
+
+        pageCtx.globalAlpha = 0.5;
+        pageCtx.lineWidth = 12;
+        pageCtx.strokeStyle = "rgba(255,36,121,0.16)";
+        pageCtx.stroke();
+        pageCtx.globalAlpha = 1;
+
+        const barCount = 120;
+        const step = Math.max(1, Math.floor(freqData.length / barCount));
+        const barW = pcw / barCount;
+        pageCtx.globalAlpha = 0.72;
+        for(let i=0;i<barCount;i++){
+          const v = freqData[Math.min(i*step, freqData.length - 1)] / 255;
+          const bh = (v*v) * (pch * 0.42);
+          const x = i * barW;
+          const y = pch - bh;
+          pageCtx.fillStyle = (i % 2 === 0) ? "rgba(0,255,255,0.34)" : "rgba(188,19,254,0.28)";
+          pageCtx.fillRect(x, y, Math.max(barW-1, 1), bh);
+        }
+        pageCtx.globalAlpha = 1;
+
+        pageCtx.globalAlpha = 0.10;
+        pageCtx.fillStyle = "#ffffff";
+        const jitter = (Math.random()*1.6);
+        for(let y=0;y<pch;y+=4){
+          pageCtx.fillRect(jitter, y, pcw, 1);
+        }
+        pageCtx.globalAlpha = 1;
+
+        ctx.beginPath();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = "rgba(0,255,255,0.45)";
+        const slice = cw / (timeData.length - 1);
+        for(let i=0;i<timeData.length;i++){
+          const v = timeData[i] / 255;
+          const y = (v * (ch * 0.55)) + (ch * 0.20);
+          const x = i * slice;
+          if(i === 0) ctx.moveTo(x,y);
+          else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+
+        rafId = requestAnimationFrame(drawViz);
+      }
+      const startViz=()=>{ if(vizRunning) return; vizRunning = true; resizeCanvas(); drawViz(); };
+      const stopViz=()=>{ vizRunning = false; if(rafId) cancelAnimationFrame(rafId); ctx.clearRect(0,0,cw,ch); pageCtx.clearRect(0,0,pcw,pch); };
+      async function playRandomTrack(){
+        const url = TRACKS[0];
+        ensureAudioContext(); audio.pause(); audio.currentTime = 0; audio.src = url;
+        try{ await audio.play(); setStatus("playing · funhouse"); startViz(); } catch(err){ setStatus("click play again · blocked by browser"); }
+      }
+      function stopPlayback(){ try{ audio.pause(); }catch(e){} try{ audio.currentTime = 0; }catch(e){} stopViz(); setStatus("stopped · idle"); }
+      playBtn.addEventListener('click', playRandomTrack); stopBtn.addEventListener('click', stopPlayback);
+    })();
+  </script>
 </body>
 </html>
