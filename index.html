@@ -55,7 +55,6 @@ body{
 .subnav a{
   cursor:pointer;
   color:#fff;
-  position:relative;
 }
 
 .subnav a:hover{
@@ -84,13 +83,18 @@ body{
   opacity:.85;
 }
 
-/* FLASH EFFECT */
+/* IMPORTANT: prevent overlays blocking clicks */
+canvas,
+.flash-screen {
+  pointer-events:none;
+}
+
+/* FLASH */
 .flash-screen{
   position:fixed;
   inset:0;
   background:#fff;
   opacity:0;
-  pointer-events:none;
   z-index:998;
 }
 
@@ -118,7 +122,7 @@ body{
   display:flex;
 }
 
-/* STATIC BACKGROUND */
+/* STATIC LAYER */
 .modal-overlay::before{
   content:"";
   position:absolute;
@@ -126,8 +130,8 @@ body{
   background:
     repeating-linear-gradient(
       to bottom,
-      rgba(255,255,255,.06) 0px,
-      rgba(255,255,255,.06) 1px,
+      rgba(255,255,255,.05) 0px,
+      rgba(255,255,255,.05) 1px,
       transparent 3px,
       transparent 5px
     );
@@ -153,27 +157,17 @@ body{
   animation:modalGlitch .35s ease;
 }
 
-/* GLITCH ENTRY */
 @keyframes modalGlitch{
-  0%{
-    transform:scale(.9) skewX(8deg);
-    opacity:0;
-  }
-  30%{
-    transform:scale(1.02) skewX(-4deg);
-  }
-  60%{
-    transform:scale(.98) skewX(2deg);
-  }
-  100%{
-    transform:scale(1) skewX(0);
-    opacity:1;
-  }
+  0%{transform:scale(.9) skewX(8deg);opacity:0;}
+  30%{transform:scale(1.02) skewX(-4deg);}
+  60%{transform:scale(.98) skewX(2deg);}
+  100%{transform:scale(1) skewX(0);opacity:1;}
 }
 
 .modal-content iframe{
   width:100%;
   height:100%;
+  border:none;
 }
 
 #closeModal{
@@ -188,6 +182,7 @@ body{
   z-index:2;
 }
 
+/* FOOTER */
 .footer{
   margin-top:30px;
   font-size:11px;
@@ -235,44 +230,49 @@ body{
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
 
-const links = document.querySelectorAll("[data-page]");
-const modal = document.getElementById("modalOverlay");
-const frame = document.getElementById("modalFrame");
-const closeBtn = document.getElementById("closeModal");
-const flash = document.getElementById("flash");
+  const links = document.querySelectorAll("[data-page]");
+  const modal = document.getElementById("modalOverlay");
+  const frame = document.getElementById("modalFrame");
+  const closeBtn = document.getElementById("closeModal");
+  const flash = document.getElementById("flash");
 
-links.forEach(link=>{
-  link.addEventListener("click",()=>{
+  console.log("Links found:", links.length);
 
-    // FLASH FIRST
-    flash.classList.add("active");
+  links.forEach(link=>{
+    link.addEventListener("click",(e)=>{
+      e.preventDefault();
 
-    setTimeout(()=>{
-      frame.src = "https://zwilighttone.github.io/zwilight/" + link.dataset.page;
-      modal.classList.add("active");
-    },120);
+      console.log("Opening:", link.dataset.page);
 
-    setTimeout(()=>{
-      flash.classList.remove("active");
-    },300);
+      flash.classList.add("active");
 
+      setTimeout(()=>{
+        frame.src = "https://zwilighttone.github.io/zwilight/" + link.dataset.page;
+        modal.classList.add("active");
+      },120);
+
+      setTimeout(()=>{
+        flash.classList.remove("active");
+      },300);
+    });
   });
-});
 
-function closeModal(){
-  modal.classList.remove("active");
-  frame.src = "";
-}
-
-closeBtn.onclick = closeModal;
-
-modal.addEventListener("click",(e)=>{
-  if(e.target === modal){
-    closeModal();
+  function closeModal(){
+    modal.classList.remove("active");
+    frame.src = "";
   }
-});
 
+  closeBtn.onclick = closeModal;
+
+  modal.addEventListener("click",(e)=>{
+    if(e.target === modal){
+      closeModal();
+    }
+  });
+
+});
 </script>
 
 </body>
