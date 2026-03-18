@@ -81,7 +81,8 @@
       padding:4px 0;
     }
 
-    .main-title::before,.main-title::after{
+    .main-title::before,
+    .main-title::after{
       content:attr(data-glitch);
       position:absolute;
       top:0;
@@ -141,20 +142,24 @@
       text-transform:uppercase;
       opacity:.90;
       position:relative;
-      z-index:20;
+      z-index:40;
     }
 
-    .subnav a{
-      text-decoration:none;
+    .subnav button{
+      appearance:none;
+      border:none;
+      background:none;
       color:rgba(224,224,255,.96);
       position:relative;
-      padding-bottom:2px;
+      padding:0 0 2px 0;
       cursor:pointer;
       white-space:nowrap;
-      user-select:none;
+      font:inherit;
+      letter-spacing:inherit;
+      text-transform:inherit;
     }
 
-    .subnav a::after{
+    .subnav button::after{
       content:"";
       position:absolute;
       left:0;
@@ -167,8 +172,8 @@
       transition:transform .16s ease-out;
     }
 
-    .subnav a:hover::after,
-    .subnav a:focus-visible::after{
+    .subnav button:hover::after,
+    .subnav button:focus-visible::after{
       transform:scaleX(1);
     }
 
@@ -375,16 +380,6 @@
 
     .slice-noise.on{opacity:.8;}
 
-    .footer{
-      margin-top:32px;
-      font-size:11px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      text-align:center;
-      opacity:.72;
-      color:rgba(220,220,240,.9);
-    }
-
     .modal-overlay{
       position:absolute;
       inset:0;
@@ -392,7 +387,7 @@
       display:none;
       align-items:stretch;
       justify-content:stretch;
-      background:rgba(3,5,12,.76);
+      background:rgba(3,5,12,.78);
       backdrop-filter:blur(2px);
       border-radius:20px;
       overflow:hidden;
@@ -413,14 +408,13 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          rgba(255,255,255,.05) 0px,
-          rgba(255,255,255,.05) 1px,
-          transparent 3px,
-          transparent 5px
-        );
+      background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.05) 0px,
+        rgba(255,255,255,.05) 1px,
+        transparent 3px,
+        transparent 5px
+      );
       mix-blend-mode:screen;
       opacity:.22;
       animation:modalScan 7s linear infinite;
@@ -509,8 +503,6 @@
       flex:1;
       overflow:auto;
       padding:6px 2px 4px;
-      scrollbar-width:thin;
-      scrollbar-color:rgba(0,255,255,.4) rgba(255,255,255,.06);
     }
 
     .modal-grid{
@@ -552,27 +544,14 @@
       color:var(--neon);
     }
 
-    .modal-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .modal-links a{
-      color:#eafcff;
-      text-decoration:none;
-      border:1px solid rgba(0,255,255,.35);
-      padding:8px 10px;
-      border-radius:999px;
-      font-size:12px;
-      letter-spacing:.12em;
+    .footer{
+      margin-top:32px;
+      font-size:11px;
+      letter-spacing:.18em;
       text-transform:uppercase;
-      background:rgba(4,8,18,.7);
-    }
-
-    .modal-links a:hover{
-      border-color:rgba(255,36,121,.7);
+      text-align:center;
+      opacity:.72;
+      color:rgba(220,220,240,.9);
     }
 
     @media (max-width:480px){
@@ -595,13 +574,13 @@
     <div class="main-title" data-glitch="ZWILIGHT TONE">ZWILIGHT&nbsp;TONE</div>
 
     <div class="subnav">
-      <a href="#" data-modal-target="updates">UPDATES</a>
+      <button type="button" data-modal-target="updates">UPDATES</button>
       <span class="subnav-sep">•</span>
-      <a href="#" data-modal-target="audio">AUDIO</a>
+      <button type="button" data-modal-target="audio">AUDIO</button>
       <span class="subnav-sep">•</span>
-      <a href="#" data-modal-target="visual">VISUAL</a>
+      <button type="button" data-modal-target="visual">VISUAL</button>
       <span class="subnav-sep">•</span>
-      <a href="#" data-modal-target="other">OTHER</a>
+      <button type="button" data-modal-target="other">OTHER</button>
     </div>
 
     <div class="controls">
@@ -618,18 +597,18 @@
         <div class="flash" id="flashLayer"></div>
         <div class="slice-noise" id="sliceNoise"></div>
 
-        <img src="https://zwilighttone.github.io/zwilight/glitchbox10.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 1">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids.webp" class="glitch-img" alt="Zwilight Tone glitch visual 2">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids2.webp" class="glitch-img" alt="Zwilight Tone glitch visual 3">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxmannequin.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 4">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxmelted.png" class="glitch-img" alt="Zwilight Tone glitch visual 5">
-        <img src="https://zwilighttone.github.io/zwilight/glitchboxtravers.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 6">
-        <img src="https://zwilighttone.github.io/zwilight/mk2.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 7">
-        <img src="https://zwilighttone.github.io/zwilight/melted.webp" class="glitch-img" alt="Zwilight Tone glitch visual 8">
-        <img src="https://zwilighttone.github.io/zwilight/1s0s.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 9">
-        <img src="https://zwilighttone.github.io/zwilight/mankinZT.jpg" class="glitch-img" alt="Zwilight Tone glitch visual 10">
-        <img src="https://zwilighttone.github.io/zwilight/zkids.webp" class="glitch-img" alt="Zwilight Tone glitch visual 11">
-        <img src="https://zwilighttone.github.io/zwilight/zkids2.webp" class="glitch-img" alt="Zwilight Tone glitch visual 12">
+        <img src="https://zwilighttone.github.io/zwilight/glitchbox10.jpg" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids.webp" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxkids2.webp" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxmannequin.jpg" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxmelted.png" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/glitchboxtravers.jpg" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/mk2.jpg" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/melted.webp" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/1s0s.jpg" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/mankinZT.jpg" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/zkids.webp" class="glitch-img" alt="">
+        <img src="https://zwilighttone.github.io/zwilight/zkids2.webp" class="glitch-img" alt="">
 
         <div class="modal-overlay" id="gboxModal">
           <div class="modal-flash" id="modalFlash"></div>
@@ -643,20 +622,16 @@
               <div class="modal-grid">
                 <div class="modal-card">
                   <h3>Transmission Log</h3>
-                  <p>Welcome to the current signal layer of Zwilight Tone. This panel can hold your running updates, release notes, warning text, rotating announcements, or glitch-coded status messages directly on the index with no outside page loading.</p>
+                  <p>Welcome to the current signal layer of Zwilight Tone. This modal lives entirely inside the index and now has its own ambient sound behavior with fade-out on close.</p>
                 </div>
                 <div class="modal-card">
                   <h3>Current Activity</h3>
                   <ul>
-                    <li>Index visuals cycling through root-hosted image set</li>
-                    <li>Audio playback and page-wide spectro behavior active</li>
-                    <li>Menu now opens self-contained modal panels on the index</li>
-                    <li>External iframe path issues eliminated</li>
+                    <li>Index visuals cycling in the glitch box</li>
+                    <li>Audio playback and full-page spectro behavior active</li>
+                    <li>Menu opens internal modal panels only</li>
+                    <li>Modal audio hit + looping atmosphere active</li>
                   </ul>
-                </div>
-                <div class="modal-card">
-                  <h3>Notes</h3>
-                  <p>Swap this text with your real update copy any time. You can also add links, warning boxes, release countdowns, or a typing effect later if you want the update area to feel more alive.</p>
                 </div>
               </div>
             </div>
@@ -671,23 +646,7 @@
               <div class="modal-grid">
                 <div class="modal-card">
                   <h3>Sound Channel</h3>
-                  <p>This section can hold album links, embedded players, release blurbs, artist aliases, tracklists, or a miniature portal to your auditory world without leaving the index.</p>
-                </div>
-                <div class="modal-card">
-                  <h3>Possible Content</h3>
-                  <ul>
-                    <li>Featured release spotlight</li>
-                    <li>Archive.org player embed</li>
-                    <li>Artist moniker roll call</li>
-                    <li>Short release statements and liner-note fragments</li>
-                  </ul>
-                </div>
-                <div class="modal-card">
-                  <h3>Quick Links</h3>
-                  <div class="modal-links">
-                    <a href="https://archive.org" target="_blank" rel="noopener noreferrer">Archive</a>
-                    <a href="https://zwilighttone.com" target="_blank" rel="noopener noreferrer">Main Site</a>
-                  </div>
+                  <p>Use this for featured releases, embeds, aliases, track notes, sound kits, or loopable fragments from the Zwilight signal stream.</p>
                 </div>
               </div>
             </div>
@@ -702,20 +661,7 @@
               <div class="modal-grid">
                 <div class="modal-card">
                   <h3>Visual Field</h3>
-                  <p>Use this area for gallery statements, image clusters, artwork notes, wax/melt experiments, glitch stills, cover art previews, or links to larger image pages later.</p>
-                </div>
-                <div class="modal-card">
-                  <h3>Visual Threads</h3>
-                  <ul>
-                    <li>Melted wax and abstract texture studies</li>
-                    <li>Industrial surreal imagery</li>
-                    <li>Animated covers and moving title treatments</li>
-                    <li>Crossovers between visuals and sound design</li>
-                  </ul>
-                </div>
-                <div class="modal-card">
-                  <h3>Expansion Point</h3>
-                  <p>You can replace this panel with a grid of thumbnails inside the modal itself, which would keep the entire visual portal contained on the front page.</p>
+                  <p>Use this for gallery notes, melted wax experiments, stills, cover fragments, animated visuals, and weird little visual transmissions.</p>
                 </div>
               </div>
             </div>
@@ -730,20 +676,7 @@
               <div class="modal-grid">
                 <div class="modal-card">
                   <h3>Peripheral Zone</h3>
-                  <p>This panel is perfect for everything that does not neatly fit under audio or visual: experiments, tools, side projects, interactive oddities, merch links, writings, or future portals.</p>
-                </div>
-                <div class="modal-card">
-                  <h3>Ideas</h3>
-                  <ul>
-                    <li>Browser synth and sequencer links</li>
-                    <li>Downloadables and resources</li>
-                    <li>Project fragments and hidden pages</li>
-                    <li>Signals from the edge of the collective</li>
-                  </ul>
-                </div>
-                <div class="modal-card">
-                  <h3>Custom Area</h3>
-                  <p>This one can become the weird box. Warnings, rotating text, broken transmissions, hidden buttons, and little experimental interfaces would fit especially well here.</p>
+                  <p>Use this for side projects, tools, merch, interactive oddities, hidden functions, transmissions, experiments, warnings, or nonsense of the finest quality.</p>
                 </div>
               </div>
             </div>
@@ -880,7 +813,6 @@
 
       function resizeCanvas(){
         dpr = Math.max(1, window.devicePixelRatio || 1);
-
         const rect = canvas.getBoundingClientRect();
         cw = rect.width; ch = rect.height;
         canvas.width = cw * dpr; canvas.height = ch * dpr;
@@ -936,13 +868,7 @@
           if(i === 0) pageCtx.moveTo(x,y);
           else pageCtx.lineTo(x,y);
         }
-
         pageCtx.stroke();
-        pageCtx.globalAlpha = 0.5;
-        pageCtx.lineWidth = 12;
-        pageCtx.strokeStyle = "rgba(255,36,121,0.16)";
-        pageCtx.stroke();
-        pageCtx.globalAlpha = 1;
 
         const barCount = 120;
         const step = Math.max(1, Math.floor(freqData.length / barCount));
@@ -956,14 +882,6 @@
           const y = pch - bh;
           pageCtx.fillStyle = (i % 2 === 0) ? "rgba(0,255,255,0.34)" : "rgba(188,19,254,0.28)";
           pageCtx.fillRect(x, y, Math.max(barW-1, 1), bh);
-        }
-        pageCtx.globalAlpha = 1;
-
-        pageCtx.globalAlpha = 0.10;
-        pageCtx.fillStyle = "#ffffff";
-        const jitter = (Math.random()*1.6);
-        for(let y=0;y<pch;y+=4){
-          pageCtx.fillRect(jitter, y, pcw, 1);
         }
         pageCtx.globalAlpha = 1;
 
@@ -1031,28 +949,108 @@
       const panels = document.querySelectorAll('[data-modal-panel]');
       const closeButtons = document.querySelectorAll('.modal-close');
 
-      if(!modal || !triggers.length || !panels.length) return;
+      const modalLoop = new Audio('bloopboop.mp3');
+      modalLoop.preload = 'auto';
+      modalLoop.loop = true;
+      modalLoop.volume = 0.18;
+
+      const modalHit = new Audio('bloopboop.mp3');
+      modalHit.preload = 'auto';
+      modalHit.loop = false;
+      modalHit.volume = 0.55;
+
+      let fadeInterval = null;
+      let modalAudioUnlocked = false;
+
+      function unlockModalAudio(){
+        if(modalAudioUnlocked) return;
+        modalAudioUnlocked = true;
+
+        const tryPrime = (audioEl) => {
+          try{
+            audioEl.play().then(() => {
+              audioEl.pause();
+              audioEl.currentTime = 0;
+            }).catch(() => {});
+          }catch(e){}
+        };
+
+        tryPrime(modalLoop);
+        tryPrime(modalHit);
+      }
+
+      document.addEventListener('pointerdown', unlockModalAudio, { once:true });
+      document.addEventListener('keydown', unlockModalAudio, { once:true });
+
+      function stopFade(){
+        if(fadeInterval){
+          clearInterval(fadeInterval);
+          fadeInterval = null;
+        }
+      }
+
+      function playModalSound(){
+        stopFade();
+
+        try{
+          modalHit.pause();
+          modalHit.currentTime = 0;
+          modalHit.volume = 0.55;
+          modalHit.play().catch(()=>{});
+        }catch(e){}
+
+        try{
+          modalLoop.pause();
+          modalLoop.currentTime = 0;
+          modalLoop.volume = 0.18;
+          modalLoop.play().catch(()=>{});
+        }catch(e){}
+      }
+
+      function fadeOutModalLoop(duration = 500){
+        stopFade();
+
+        const startVolume = modalLoop.volume;
+        const steps = 12;
+        const stepTime = Math.max(20, Math.floor(duration / steps));
+        let currentStep = 0;
+
+        fadeInterval = setInterval(() => {
+          currentStep += 1;
+          const nextVolume = startVolume * (1 - currentStep / steps);
+          modalLoop.volume = Math.max(0, nextVolume);
+
+          if(currentStep >= steps){
+            stopFade();
+            modalLoop.pause();
+            modalLoop.currentTime = 0;
+            modalLoop.volume = 0.18;
+          }
+        }, stepTime);
+      }
 
       function closeAllPanels(){
         panels.forEach(panel => panel.classList.remove('active'));
         modal.classList.remove('active');
+        fadeOutModalLoop(550);
       }
 
       function openPanel(name){
         panels.forEach(panel => {
           panel.classList.toggle('active', panel.dataset.modalPanel === name);
         });
+
         modal.classList.add('active');
         modalFlash.classList.remove('active');
         void modalFlash.offsetWidth;
         modalFlash.classList.add('active');
+        playModalSound();
       }
 
       triggers.forEach(trigger => {
-        trigger.addEventListener('click', (e) => {
-          e.preventDefault();
-          const target = trigger.dataset.modalTarget;
-          openPanel(target);
+        trigger.addEventListener('click', () => {
+          unlockModalAudio();
+          openPanel(trigger.dataset.modalTarget);
         });
       });
 
