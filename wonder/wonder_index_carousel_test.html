@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wonder - Earring Carousel Test</title>
+  <style>
+    :root{
+      --bg1:#050816;
+      --bg2:#0d1430;
+      --card-w:min(42vw, 320px);
+      --card-h:min(58vw, 430px);
+      --radius:26px;
+      --gap:clamp(18px, 3vw, 42px);
+      --transition:650ms cubic-bezier(.2,.75,.1,1);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(92,74,168,.35), transparent 28%),
+        radial-gradient(circle at 20% 80%, rgba(30,110,190,.16), transparent 26%),
+        linear-gradient(180deg, var(--bg2), var(--bg1) 55%, #04050c);
+      color:#fff;
+      font-family:Arial, Helvetica, sans-serif;
+      overflow:hidden;
+    }
+
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .scene{
+      width:min(1280px, 100vw);
+      height:min(760px, 100vh);
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      perspective:1400px;
+      perspective-origin:50% 38%;
+      overflow:hidden;
+      padding:20px;
+    }
+
+    .scene::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.06), transparent 35%),
+        linear-gradient(180deg, transparent 55%, rgba(255,255,255,.03) 65%, transparent 100%);
+      pointer-events:none;
+    }
+
+    .carousel{
+      position:relative;
+      width:100%;
+      height:100%;
+      transform-style:preserve-3d;
+    }
+
+    .card{
+      position:absolute;
+      top:50%;
+      left:50%;
+      width:var(--card-w);
+      aspect-ratio: 3 / 4;
+      margin-left:calc(var(--card-w) / -2);
+      margin-top:calc((var(--card-w) * 4 / 3) / -2);
+      transform-style:preserve-3d;
+      transition:transform var(--transition), opacity var(--transition), filter var(--transition);
+      cursor:pointer;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    .img-wrap{
+      position:relative;
+      width:100%;
+      height:100%;
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:
+        0 18px 45px rgba(0,0,0,.38),
+        0 0 0 1px rgba(255,255,255,.08) inset;
+      background:rgba(255,255,255,.04);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .img-wrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+    }
+
+    .reflection{
+      position:absolute;
+      left:0;
+      right:0;
+      top:calc(100% + 10px);
+      height:78%;
+      border-radius:0 0 var(--radius) var(--radius);
+      overflow:hidden;
+      transform:scaleY(-1);
+      opacity:.33;
+      filter:blur(1px);
+      pointer-events:none;
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 72%);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 72%);
+    }
+
+    .reflection img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .floor-glow{
+      position:absolute;
+      width:40%;
+      height:34px;
+      background:radial-gradient(circle, rgba(255,255,255,.18), rgba(255,255,255,.02) 60%, transparent 75%);
+      left:50%;
+      bottom:13%;
+      transform:translateX(-50%);
+      filter:blur(18px);
+      pointer-events:none;
+    }
+
+    .controls{
+      position:absolute;
+      inset:auto 0 34px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:16px;
+      z-index:20;
+    }
+
+    .btn{
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      font-size:22px;
+      cursor:pointer;
+      transition:transform .2s ease, background .2s ease;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      box-shadow:0 8px 22px rgba(0,0,0,.3);
+    }
+    .btn:hover{transform:translateY(-2px); background:rgba(255,255,255,.2)}
+
+    .dots{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:rgba(255,255,255,.35);
+      transition:transform .25s ease, background .25s ease, opacity .25s ease;
+      opacity:.8;
+    }
+
+    .dot.active{
+      background:#fff;
+      transform:scale(1.35);
+      opacity:1;
+    }
+
+    .hint{
+      position:absolute;
+      top:22px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.65);
+      text-align:center;
+      z-index:20;
+    }
+
+    @media (max-width: 700px){
+      :root{
+        --card-w:min(56vw, 270px);
+        --radius:20px;
+      }
+
+      .controls{
+        bottom:22px;
+      }
+
+      .btn{
+        width:42px;
+        height:42px;
+      }
+
+      .hint{
+        top:14px;
+        font-size:11px;
+        width:90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="hint">Wonder carousel test • click image or use arrows</div>
+    <div class="floor-glow"></div>
+
+    <div class="carousel" id="carousel">
+      <div class="card">
+        <div class="img-wrap">
+          <img src="earrings_1_optimized.png" alt="Pink resin earrings">
+        </div>
+        <div class="reflection"><img src="earrings_1_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card">
+        <div class="img-wrap">
+          <img src="earrings_2_optimized.png" alt="Blue butterfly earrings">
+        </div>
+        <div class="reflection"><img src="earrings_2_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card">
+        <div class="img-wrap">
+          <img src="earrings_3_optimized.png" alt="Purple butterfly earrings">
+        </div>
+        <div class="reflection"><img src="earrings_3_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card">
+        <div class="img-wrap">
+          <img src="earrings_4_optimized.png" alt="Teal resin earrings">
+        </div>
+        <div class="reflection"><img src="earrings_4_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card">
+        <div class="img-wrap">
+          <img src="earrings_5_optimized.png" alt="Yellow wing earrings">
+        </div>
+        <div class="reflection"><img src="earrings_5_optimized.png" alt=""></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="prev" aria-label="Previous">&#10094;</button>
+      <div class="dots" id="dots"></div>
+      <button class="btn" id="next" aria-label="Next">&#10095;</button>
+    </div>
+  </div>
+
+  <script>
+    const cards = [...document.querySelectorAll('.card')];
+    const dotsWrap = document.getElementById('dots');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+
+    let active = 2;
+    const total = cards.length;
+
+    cards.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'dot';
+      dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      dot.style.border = 'none';
+      dot.style.padding = '0';
+      dot.style.cursor = 'pointer';
+      dot.style.backgroundClip = 'padding-box';
+      dot.addEventListener('click', () => {
+        active = i;
+        render();
+      });
+      dotsWrap.appendChild(dot);
+    });
+
+    function render(){
+      cards.forEach((card, i) => {
+        const offset = i - active;
+        const abs = Math.abs(offset);
+
+        let x = offset * 19;
+        let z = -abs * 190;
+        let rotateY = offset * -32;
+        let scale = Math.max(0.68, 1 - abs * 0.12);
+        let opacity = abs > 3 ? 0 : 1;
+        let blur = abs > 0 ? Math.min(abs * 1.2, 4) : 0;
+
+        if (window.innerWidth < 700){
+          x = offset * 24;
+          z = -abs * 140;
+          rotateY = offset * -28;
+          scale = Math.max(0.62, 1 - abs * 0.14);
+        }
+
+        card.style.transform =
+          `translate3d(${x}vw, -50%, ${z}px) rotateY(${rotateY}deg) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.filter = `blur(${blur}px) brightness(${i === active ? 1 : 0.7})`;
+        card.style.zIndex = total - abs;
+
+        card.querySelector('.img-wrap').style.boxShadow = i === active
+          ? '0 28px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.14) inset, 0 0 34px rgba(160,180,255,.15)'
+          : '0 18px 45px rgba(0,0,0,.38), 0 0 0 1px rgba(255,255,255,.08) inset';
+      });
+
+      [...dotsWrap.children].forEach((dot, i) => {
+        dot.classList.toggle('active', i === active);
+      });
+    }
+
+    function next(){
+      active = (active + 1) % total;
+      render();
+    }
+
+    function prev(){
+      active = (active - 1 + total) % total;
+      render();
+    }
+
+    nextBtn.addEventListener('click', next);
+    prevBtn.addEventListener('click', prev);
+
+    cards.forEach((card, i) => {
+      card.addEventListener('click', () => {
+        if (i === active) return;
+        active = i;
+        render();
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
+    });
+
+    let auto = setInterval(next, 4200);
+
+    function resetAuto(){
+      clearInterval(auto);
+      auto = setInterval(next, 4200);
+    }
+
+    nextBtn.addEventListener('click', resetAuto);
+    prevBtn.addEventListener('click', resetAuto);
+    cards.forEach(card => card.addEventListener('click', resetAuto));
+
+    render();
+    window.addEventListener('resize', render);
+  </script>
+</body>
+</html>
