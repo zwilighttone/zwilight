@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wonder - Earring Carousel Test</title>
+  <style>
+    :root{
+      --bg1:#050816;
+      --bg2:#0d1430;
+      --card-w:min(31.5vw, 240px);
+      --card-h:min(43.5vw, 322px);
+      --radius:26px;
+      --gap:clamp(18px, 3vw, 42px);
+      --transition:650ms cubic-bezier(.2,.75,.1,1);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(92,74,168,.35), transparent 28%),
+        radial-gradient(circle at 20% 80%, rgba(30,110,190,.16), transparent 26%),
+        linear-gradient(180deg, var(--bg2), var(--bg1) 55%, #04050c);
+      color:#fff;
+      font-family:Arial, Helvetica, sans-serif;
+      overflow:hidden;
+    }
+
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .scene{
+      width:min(1280px, 100vw);
+      height:min(760px, 100vh);
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      perspective:1400px;
+      perspective-origin:50% 38%;
+      overflow:hidden;
+      padding:20px;
+    }
+
+    .scene::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.06), transparent 35%),
+        linear-gradient(180deg, transparent 55%, rgba(255,255,255,.03) 65%, transparent 100%);
+      pointer-events:none;
+    }
+
+    .carousel{
+      position:relative;
+      width:100%;
+      height:100%;
+      transform-style:preserve-3d;
+    }
+
+    .card{
+      position:absolute;
+      top:50%;
+      left:50%;
+      width:var(--card-w);
+      aspect-ratio: 3 / 4;
+      margin-left:calc(var(--card-w) / -2);
+      margin-top:calc((var(--card-w) * 4 / 3) / -2);
+      transform-style:preserve-3d;
+      transition:transform var(--transition), opacity var(--transition), filter var(--transition);
+      cursor:pointer;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    .img-wrap{
+      position:relative;
+      width:100%;
+      height:100%;
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:
+        0 18px 45px rgba(0,0,0,.38),
+        0 0 0 1px rgba(255,255,255,.08) inset;
+      background:rgba(255,255,255,.04);
+      position:relative;
+      isolation:isolate;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .img-wrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+    }
+
+    .img-wrap::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03)),
+        radial-gradient(circle at 50% 12%, rgba(255,255,255,.12), transparent 42%);
+      backdrop-filter:blur(6px) saturate(.82);
+      -webkit-backdrop-filter:blur(6px) saturate(.82);
+      opacity:var(--overlay-opacity, 0);
+      transition:opacity var(--transition);
+      pointer-events:none;
+    }
+
+    .reflection{
+      position:absolute;
+      left:0;
+      right:0;
+      top:calc(100% + 10px);
+      height:78%;
+      border-radius:var(--radius);
+      overflow:hidden;
+      transform:scaleY(-1);
+      opacity:.33;
+      filter:blur(1px);
+      pointer-events:none;
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 72%);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 72%);
+    }
+
+    .reflection img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .floor-glow{
+      position:absolute;
+      width:40%;
+      height:34px;
+      background:radial-gradient(circle, rgba(255,255,255,.18), rgba(255,255,255,.02) 60%, transparent 75%);
+      left:50%;
+      bottom:13%;
+      transform:translateX(-50%);
+      filter:blur(18px);
+      pointer-events:none;
+    }
+
+    .controls{
+      position:absolute;
+      inset:auto 0 34px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:16px;
+      z-index:20;
+    }
+
+    .btn{
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      font-size:22px;
+      cursor:pointer;
+      transition:transform .2s ease, background .2s ease;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      box-shadow:0 8px 22px rgba(0,0,0,.3);
+    }
+    .btn:hover{transform:translateY(-2px); background:rgba(255,255,255,.2)}
+
+    .dots{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:rgba(255,255,255,.35);
+      transition:transform .25s ease, background .25s ease, opacity .25s ease;
+      opacity:.8;
+    }
+
+    .dot.active{
+      background:#fff;
+      transform:scale(1.35);
+      opacity:1;
+    }
+
+    .hint{
+      position:absolute;
+      top:22px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.65);
+      text-align:center;
+      z-index:20;
+    }
+
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(3,6,18,.72);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .35s ease;
+      z-index:60;
+    }
+
+    .modal.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .modal-panel{
+      position:relative;
+      width:min(920px, 92vw);
+      max-height:min(88vh, 860px);
+      overflow:auto;
+      border-radius:28px;
+      background:
+        linear-gradient(180deg, rgba(20,27,58,.96), rgba(9,13,28,.98));
+      box-shadow:
+        0 24px 80px rgba(0,0,0,.48),
+        0 0 0 1px rgba(255,255,255,.08) inset,
+        0 0 36px rgba(160,180,255,.12);
+      color:#fff;
+    }
+
+    .modal-content{
+      display:grid;
+      grid-template-columns:minmax(260px, 380px) minmax(280px, 1fr);
+      gap:28px;
+      padding:28px;
+      align-items:start;
+    }
+
+    .modal-image-wrap{
+      border-radius:22px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow:0 12px 34px rgba(0,0,0,.34), 0 0 0 1px rgba(255,255,255,.08) inset;
+      aspect-ratio:3 / 4;
+    }
+
+    .modal-image-wrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .modal-copy h2{
+      margin:0 0 8px;
+      font-size:clamp(1.5rem, 2vw, 2.1rem);
+      line-height:1.1;
+    }
+
+    .modal-copy .sku{
+      margin:0 0 16px;
+      color:rgba(255,255,255,.65);
+      font-size:.92rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .modal-copy p{
+      margin:0 0 16px;
+      line-height:1.6;
+      color:rgba(255,255,255,.88);
+    }
+
+    .modal-features{
+      display:grid;
+      gap:10px;
+      margin:18px 0 22px;
+    }
+
+    .modal-features div{
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.06);
+      box-shadow:0 0 0 1px rgba(255,255,255,.05) inset;
+      color:rgba(255,255,255,.92);
+      font-size:.96rem;
+    }
+
+    .modal-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .modal-btn{
+      border:none;
+      border-radius:999px;
+      padding:12px 18px;
+      font-size:.95rem;
+      cursor:pointer;
+      color:#fff;
+      background:rgba(255,255,255,.12);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      box-shadow:0 8px 22px rgba(0,0,0,.24);
+      transition:transform .2s ease, background .2s ease;
+    }
+
+    .modal-btn:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.18);
+    }
+
+    .modal-close{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:42px;
+      height:42px;
+      border:none;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      font-size:22px;
+      cursor:pointer;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      box-shadow:0 8px 22px rgba(0,0,0,.24);
+    }
+
+
+    @media (max-width: 700px){
+      :root{
+        --card-w:min(42vw, 202px);
+        --radius:20px;
+      }
+
+      .controls{
+        bottom:22px;
+      }
+
+      .btn{
+        width:42px;
+        height:42px;
+      }
+
+      .hint{
+        top:14px;
+        font-size:11px;
+        width:90%;
+      }
+
+      .modal{
+        padding:14px;
+      }
+
+      .modal-content{
+        grid-template-columns:1fr;
+        gap:18px;
+        padding:18px;
+      }
+
+      .modal-panel{
+        width:100%;
+        max-height:92vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="hint">Wonder carousel test • click image or use arrows</div>
+    <div class="floor-glow"></div>
+
+    <div class="carousel" id="carousel">
+      <div class="card" data-index="0">
+        <div class="img-wrap">
+          <img src="earrings_1_optimized.png" alt="Pink resin earrings">
+        </div>
+        <div class="reflection"><img src="earrings_1_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card" data-index="1">
+        <div class="img-wrap">
+          <img src="earrings_2_optimized.png" alt="Blue butterfly earrings">
+        </div>
+        <div class="reflection"><img src="earrings_2_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card" data-index="2">
+        <div class="img-wrap">
+          <img src="earrings_3_optimized.png" alt="Purple butterfly earrings">
+        </div>
+        <div class="reflection"><img src="earrings_3_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card" data-index="3">
+        <div class="img-wrap">
+          <img src="earrings_4_optimized.png" alt="Teal resin earrings">
+        </div>
+        <div class="reflection"><img src="earrings_4_optimized.png" alt=""></div>
+      </div>
+
+      <div class="card" data-index="4">
+        <div class="img-wrap">
+          <img src="earrings_5_optimized.png" alt="Yellow wing earrings">
+        </div>
+        <div class="reflection"><img src="earrings_5_optimized.png" alt=""></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="prev" aria-label="Previous">&#10094;</button>
+      <div class="dots" id="dots"></div>
+      <button class="btn" id="next" aria-label="Next">&#10095;</button>
+    </div>
+  </div>
+
+
+    <div class="modal" id="productModal" aria-hidden="true">
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
+        <div class="modal-content">
+          <div class="modal-image-wrap">
+            <img id="modalImage" src="" alt="">
+          </div>
+          <div class="modal-copy">
+            <h2 id="modalTitle">Product Title</h2>
+            <p class="sku" id="modalSku">One of a kind piece</p>
+            <p id="modalDescription"></p>
+            <div class="modal-features">
+              <div id="feature1"></div>
+              <div id="feature2"></div>
+              <div id="feature3"></div>
+            </div>
+            <div class="modal-actions">
+              <button class="modal-btn" type="button">Inquire About This Piece</button>
+              <button class="modal-btn" type="button" id="modalCloseSecondary">Back to Gallery</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script>
+    const cards = [...document.querySelectorAll('.card')];
+    const dotsWrap = document.getElementById('dots');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const modal = document.getElementById('productModal');
+    const modalClose = document.getElementById('modalClose');
+    const modalCloseSecondary = document.getElementById('modalCloseSecondary');
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSku = document.getElementById('modalSku');
+    const modalDescription = document.getElementById('modalDescription');
+    const feature1 = document.getElementById('feature1');
+    const feature2 = document.getElementById('feature2');
+    const feature3 = document.getElementById('feature3');
+
+    const products = [
+      {
+        title: 'Pink Resin Earrings',
+        sku: 'Wonder Piece 01',
+        image: 'earrings_1_optimized.png',
+        alt: 'Pink resin earrings',
+        description: 'A dreamy handmade piece with soft color and a light-catching finish, presented as a featured item from the Wonder carousel.',
+        features: ['Lightweight statement design', 'Glossy resin finish', 'One-of-a-kind studio piece']
+      },
+      {
+        title: 'Blue Butterfly Earrings',
+        sku: 'Wonder Piece 02',
+        image: 'earrings_2_optimized.png',
+        alt: 'Blue butterfly earrings',
+        description: 'A butterfly-inspired design with cool tones and delicate shape, styled as an elegant centerpiece for the product view.',
+        features: ['Butterfly wing silhouette', 'Cool blue palette', 'Handmade wearable art']
+      },
+      {
+        title: 'Purple Butterfly Earrings',
+        sku: 'Wonder Piece 03',
+        image: 'earrings_3_optimized.png',
+        alt: 'Purple butterfly earrings',
+        description: 'A richer, more mystical variation with purple tones and a crafted boutique feel for the expanded product modal.',
+        features: ['Vivid purple tones', 'Soft sculptural look', 'Display-ready artisan piece']
+      },
+      {
+        title: 'Teal Resin Earrings',
+        sku: 'Wonder Piece 04',
+        image: 'earrings_4_optimized.png',
+        alt: 'Teal resin earrings',
+        description: 'A sleek resin pair with a cool teal character and a polished visual style meant to feel clean, modern, and collectible.',
+        features: ['Teal-toned resin body', 'Minimal polished presentation', 'Handmade studio jewelry']
+      },
+      {
+        title: 'Yellow Wing Earrings',
+        sku: 'Wonder Piece 05',
+        image: 'earrings_5_optimized.png',
+        alt: 'Yellow wing earrings',
+        description: 'A brighter wing-inspired pair with cheerful warmth and a handcrafted aesthetic that stands out in the gallery.',
+        features: ['Bright wing-like profile', 'Warm golden-yellow palette', 'Unique handcrafted finish']
+      }
+    ];
+
+    let active = 2;
+    const total = cards.length;
+
+    cards.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'dot';
+      dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      dot.style.border = 'none';
+      dot.style.padding = '0';
+      dot.style.cursor = 'pointer';
+      dot.style.backgroundClip = 'padding-box';
+      dot.addEventListener('click', () => {
+        active = i;
+        render();
+      });
+      dotsWrap.appendChild(dot);
+    });
+
+    function render(){
+      cards.forEach((card, i) => {
+        const offset = i - active;
+        const abs = Math.abs(offset);
+
+        let x = offset * 15.5;
+        let z = -abs * 190;
+        let rotateY = offset * -32;
+        let scale = Math.max(0.68, 1 - abs * 0.12);
+        let opacity = abs > 3 ? 0 : 1;
+        const overlayOpacity = i === active ? 0 : Math.min(0.18 + abs * 0.14, 0.56);
+
+        if (window.innerWidth < 700){
+          x = offset * 19.5;
+          z = -abs * 140;
+          rotateY = offset * -28;
+          scale = Math.max(0.62, 1 - abs * 0.14);
+        }
+
+        card.style.transform =
+          `translate3d(${x}vw, -50%, ${z}px) rotateY(${rotateY}deg) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.filter = `brightness(${i === active ? 1 : 0.82})`;
+        card.style.zIndex = total - abs;
+
+        const wrap = card.querySelector('.img-wrap');
+        wrap.style.boxShadow = i === active
+          ? '0 28px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.14) inset, 0 0 34px rgba(160,180,255,.15)'
+          : '0 18px 45px rgba(0,0,0,.38), 0 0 0 1px rgba(255,255,255,.08) inset';
+        wrap.style.setProperty('--overlay-opacity', overlayOpacity);
+      });
+
+      [...dotsWrap.children].forEach((dot, i) => {
+        dot.classList.toggle('active', i === active);
+      });
+    }
+
+    function next(){
+      active = (active + 1) % total;
+      render();
+    }
+
+    function prev(){
+      active = (active - 1 + total) % total;
+      render();
+    }
+
+    nextBtn.addEventListener('click', next);
+    prevBtn.addEventListener('click', prev);
+
+    function openModal(index){
+      const product = products[index];
+      if (!product) return;
+      modalImage.src = product.image;
+      modalImage.alt = product.alt;
+      modalTitle.textContent = product.title;
+      modalSku.textContent = product.sku;
+      modalDescription.textContent = product.description;
+      feature1.textContent = product.features[0];
+      feature2.textContent = product.features[1];
+      feature3.textContent = product.features[2];
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(){
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    cards.forEach((card, i) => {
+      card.addEventListener('click', () => {
+        if (i !== active){
+          active = i;
+          render();
+          return;
+        }
+        openModal(i);
+      });
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalCloseSecondary.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
+    });
+
+
+    render();
+    window.addEventListener('resize', render);
+  </script>
+</body>
+</html>
