@@ -826,9 +826,13 @@
       window.addEventListener('resize', resizeCanvas);
       resizeCanvas();
 
-      function ensureAudioContext(){
+      async function ensureAudioContext(){
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if(audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
+
+        if(audioCtx.state === "suspended"){
+          await audioCtx.resume();
+        }
+
         if(!analyser){
           analyser = audioCtx.createAnalyser();
           analyser.fftSize = 2048;
@@ -918,16 +922,21 @@
 
       async function playRandomTrack(){
         const url = TRACKS[0];
-        ensureAudioContext();
-        audio.pause();
-        audio.currentTime = 0;
-        audio.src = url;
+
         try{
+          audio.pause();
+          audio.currentTime = 0;
+          audio.src = url;
+          audio.load();
+
+          await ensureAudioContext();
           await audio.play();
+
           setStatus("playing · funhouse");
           startViz();
         }catch(err){
-          setStatus("click play again · blocked by browser");
+          console.error("Audio failed:", err);
+          setStatus("audio failed · check console");
         }
       }
 
@@ -949,90 +958,9 @@
       const panels = document.querySelectorAll('[data-modal-panel]');
       const closeButtons = document.querySelectorAll('.modal-close');
 
-      const modalLoop = new Audio('bloopboop.mp3');
-      modalLoop.preload = 'auto';
-      modalLoop.loop = true;
-      modalLoop.volume = 0.18;
-
-      const modalHit = new Audio('bloopboop.mp3');
-      modalHit.preload = 'auto';
-      modalHit.loop = false;
-      modalHit.volume = 0.55;
-
-      let fadeInterval = null;
-      let modalAudioUnlocked = false;
-
-      function unlockModalAudio(){
-        if(modalAudioUnlocked) return;
-        modalAudioUnlocked = true;
-
-        const tryPrime = (audioEl) => {
-          try{
-            audioEl.play().then(() => {
-              audioEl.pause();
-              audioEl.currentTime = 0;
-            }).catch(() => {});
-          }catch(e){}
-        };
-
-        tryPrime(modalLoop);
-        tryPrime(modalHit);
-      }
-
-      document.addEventListener('pointerdown', unlockModalAudio, { once:true });
-      document.addEventListener('keydown', unlockModalAudio, { once:true });
-
-      function stopFade(){
-        if(fadeInterval){
-          clearInterval(fadeInterval);
-          fadeInterval = null;
-        }
-      }
-
-      function playModalSound(){
-        stopFade();
-
-        try{
-          modalHit.pause();
-          modalHit.currentTime = 0;
-          modalHit.volume = 0.55;
-          modalHit.play().catch(()=>{});
-        }catch(e){}
-
-        try{
-          modalLoop.pause();
-          modalLoop.currentTime = 0;
-          modalLoop.volume = 0.18;
-          modalLoop.play().catch(()=>{});
-        }catch(e){}
-      }
-
-      function fadeOutModalLoop(duration = 500){
-        stopFade();
-
-        const startVolume = modalLoop.volume;
-        const steps = 12;
-        const stepTime = Math.max(20, Math.floor(duration / steps));
-        let currentStep = 0;
-
-        fadeInterval = setInterval(() => {
-          currentStep += 1;
-          const nextVolume = startVolume * (1 - currentStep / steps);
-          modalLoop.volume = Math.max(0, nextVolume);
-
-          if(currentStep >= steps){
-            stopFade();
-            modalLoop.pause();
-            modalLoop.currentTime = 0;
-            modalLoop.volume = 0.18;
-          }
-        }, stepTime);
-      }
-
       function closeAllPanels(){
         panels.forEach(panel => panel.classList.remove('active'));
         modal.classList.remove('active');
-        fadeOutModalLoop(550);
       }
 
       function openPanel(name){
@@ -1044,12 +972,10 @@
         modalFlash.classList.remove('active');
         void modalFlash.offsetWidth;
         modalFlash.classList.add('active');
-        playModalSound();
       }
 
       triggers.forEach(trigger => {
         trigger.addEventListener('click', () => {
-          unlockModalAudio();
           openPanel(trigger.dataset.modalTarget);
         });
       });
