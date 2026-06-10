@@ -799,10 +799,11 @@
       const stopBtn = document.getElementById('stopBtn');
       const statusEl = document.getElementById('status');
       const audio = new Audio();
+      audio.preload = "auto";
       audio.crossOrigin = "anonymous";
       audio.loop = true;
 
-      let audioCtx=null, analyser=null, srcNode=null, freqData=null, timeData=null, vizRunning=false, rafId=0;
+      let audioCtx=null, analyser=null, srcNode=null, freqData=null, timeData=null, vizRunning=false, rafId=0, analyserUnavailable=false;
       const canvas = document.getElementById('vizCanvas');
       const ctx = canvas.getContext('2d');
       const pageCanvas = document.getElementById('pageVizCanvas');
@@ -827,21 +828,33 @@
       resizeCanvas();
 
       async function ensureAudioContext(){
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(analyserUnavailable) return false;
 
-        if(audioCtx.state === "suspended"){
-          await audioCtx.resume();
-        }
+        try{
+          if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        if(!analyser){
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 2048;
-          analyser.smoothingTimeConstant = 0.78;
-          srcNode = audioCtx.createMediaElementSource(audio);
-          srcNode.connect(analyser);
-          analyser.connect(audioCtx.destination);
-          freqData = new Uint8Array(analyser.frequencyBinCount);
-          timeData = new Uint8Array(analyser.fftSize);
+          if(audioCtx.state === "suspended"){
+            await audioCtx.resume();
+          }
+
+          if(!analyser){
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.78;
+            srcNode = audioCtx.createMediaElementSource(audio);
+            srcNode.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            freqData = new Uint8Array(analyser.frequencyBinCount);
+            timeData = new Uint8Array(analyser.fftSize);
+          }
+
+          return true;
+        }catch(err){
+          // If Web Audio/CORS analysis fails, still allow the song to play.
+          analyserUnavailable = true;
+          analyser = null;
+          console.warn("Visualizer disabled; plain audio will still play:", err);
+          return false;
         }
       }
 
@@ -907,7 +920,7 @@
       }
 
       const startViz=()=>{
-        if(vizRunning) return;
+        if(vizRunning || !analyser) return;
         vizRunning = true;
         resizeCanvas();
         drawViz();
@@ -924,19 +937,19 @@
         const url = TRACKS[0];
 
         try{
+          stopViz();
           audio.pause();
-          audio.currentTime = 0;
           audio.src = url;
           audio.load();
 
-          await ensureAudioContext();
+          const canVisualize = await ensureAudioContext();
           await audio.play();
 
-          setStatus("playing · funhouse");
-          startViz();
+          setStatus(canVisualize ? "playing · funhouse" : "playing · visualizer unavailable");
+          if(canVisualize) startViz();
         }catch(err){
-          console.error("Audio failed:", err);
-          setStatus("audio failed · check console");
+          console.error("Audio failed:", err.name, err.message, err);
+          setStatus(`audio failed · ${err.name || 'unknown error'}`);
         }
       }
 
